@@ -46,6 +46,33 @@ func (t *Instruction) Execute() string {
 	return result
 }
 
+func (t *Instruction) ExecuteNew() string {
+	for _, move := range t.Moves {
+		var itr int
+		var carrying []string
+		for itr < move.Count {
+			itr++
+			var val string
+			val, t.Stacks[move.Src-1] = pop(t.Stacks[move.Src-1])
+			carrying = append([]string{val}, carrying...)
+		}
+
+		t.Stacks[move.Dest-1] = append(t.Stacks[move.Dest-1], carrying...)
+	}
+
+	var result string
+	for _, crate := range t.Stacks {
+		if len(crate) == 0 {
+			continue
+		}
+
+		last := crate[len(crate)-1]
+		result += last
+	}
+
+	return result
+}
+
 func main() {
 	file, err := os.Open("./input.txt")
 	if err != nil {
@@ -54,6 +81,10 @@ func main() {
 
 	scanner := bufio.NewScanner(file)
 	inst := parseInput(scanner)
-	answ := inst.Execute()
-	fmt.Println(answ)
+
+	// crateMover9000 := inst.Execute()
+	// fmt.Println(crateMover9000)
+
+	crateMover9001 := inst.ExecuteNew()
+	fmt.Println(crateMover9001)
 }
