@@ -11,11 +11,15 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(findMarker(string(data)))
+	fmt.Println(findMarker(string(data), 4))
+	fmt.Println(findMarker(string(data), 14))
 }
 
-func findMarker(datastream string) int {
-	var buff Buff
+func findMarker(datastream string, buffSize int) int {
+	buff := Buff{
+		size: buffSize,
+	}
+
 	for i, char := range datastream {
 		buff.Put(char)
 		if !buff.IsFull() {
@@ -32,17 +36,18 @@ func findMarker(datastream string) int {
 
 type Buff struct {
 	data []rune
+	size int
 }
 
 func (t *Buff) Put(v rune) {
 	t.data = append(t.data, v)
-	if len(t.data) > 4 {
-		t.data = t.data[1:]
+	if len(t.data) > t.size {
+		t.data = t.data[1:] // Discard the first character
 	}
 }
 
 func (t *Buff) IsFull() bool {
-	return len(t.data) == 4
+	return len(t.data) == t.size
 }
 
 func (t *Buff) IsDistinct() bool {
