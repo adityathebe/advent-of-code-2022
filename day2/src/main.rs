@@ -40,8 +40,33 @@ impl FromStr for Code {
     }
 }
 
+#[derive(Debug)]
+enum Outcome {
+    Lose,
+    Draw,
+    Win,
+}
+
+impl FromStr for Outcome {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Outcome, Self::Err> {
+        match input {
+            "X" => Ok(Outcome::Lose),
+            "Y" => Ok(Outcome::Draw),
+            "Z" => Ok(Outcome::Win),
+            _ => Err(()),
+        }
+    }
+}
+
 fn main() {
     let contents = include_str!("../input.txt");
+    part_a(&contents);
+    part_b(&contents);
+}
+
+fn part_a(contents: &str) {
     let mut total_points: u32 = 0;
 
     // Simply calculate the total of each elves
@@ -57,7 +82,55 @@ fn main() {
         total_points += total_point;
     }
 
-    println!("{}", total_points);
+    println!("Part A: {}", total_points);
+}
+
+// X means you need to lose,
+// Y means you need to end the round in a draw,
+// and Z means you need to win.
+fn part_b(contents: &str) {
+    let mut total_points: u32 = 0;
+
+    // Simply calculate the total of each elves
+    for line in contents.lines() {
+        let split = line.split(" ").collect::<Vec<&str>>();
+
+        let opponent_move = Move::from_str(split[0]).unwrap();
+        let outcome = Outcome::from_str(split[1]).unwrap();
+        let my_move = get_move_for_outcome(&opponent_move, &outcome);
+        let game_point = get_game_point(&opponent_move, &my_move);
+        let my_move_point = get_move_point(&my_move);
+        let total_point = game_point + my_move_point;
+        total_points += total_point;
+    }
+
+    println!("Part B: {}", total_points);
+}
+
+fn get_move_for_outcome(opponent_move: &Move, outcome: &Outcome) -> Move {
+    match opponent_move {
+        Move::Rock => {
+            return match outcome {
+                Outcome::Win => Move::Paper,
+                Outcome::Lose => Move::Scissors,
+                Outcome::Draw => Move::Rock,
+            }
+        }
+        Move::Paper => {
+            return match outcome {
+                Outcome::Win => Move::Scissors,
+                Outcome::Lose => Move::Rock,
+                Outcome::Draw => Move::Paper,
+            }
+        }
+        Move::Scissors => {
+            return match outcome {
+                Outcome::Win => Move::Rock,
+                Outcome::Lose => Move::Paper,
+                Outcome::Draw => Move::Scissors,
+            }
+        }
+    }
 }
 
 fn get_move_from_code(m: Code) -> Move {
